@@ -16,7 +16,7 @@ James~Bosch
 \setDocStatus{draft}
 
 \setDocAbstract{%
-Most catalog measurements produced in a LSST Data Release Production will be derived from pixel values that have been \emph{deblended} -- we have apportioned the flux in each pixel to each of the \Objects that overlap that pixel.  These deblended pixels values are thus a critical link in our provenance chain, and should be provided to users as a first-class data product.  This document provides further justification for the proposal to add this data product and provides a preliminary estimate of the impact on data storage requirements.
+Most catalog measurements produced in a LSST Data Release Production will be derived from pixel values that have been \emph{deblended} -- we have apportioned the flux in each pixel to each of the \Objects that overlap that pixel.  These deblended pixels values are thus a critical link in our provenance chain, and should be provided to users as a first-class data product.  This document provides further justification for the proposal to add this data product and provides a preliminary estimate of the impact on data storage requirements of an additional $83\,\mathrm{TB}$ in DR1 and $221\,\mathrm{TB}$ in DR11.
 }
 
 % Change history defined here. Will be inserted into
@@ -51,7 +51,7 @@ We propose adding deblended \emph{deep} coadd pixel values (in each band) for ea
 
 Despite the fact that they are tied to \Objects, the access patterns for \texttt{HeavyFootprints} should be assumed to be more coupled to the access patterns for coadd images, but will be even less frequent: users who request \texttt{HeavyFootprints} will almost always want coadd images as well (though the converse is not true).  We anticipate that in most cases, these requests will be for single \Objects (and cut-outs of coadd images near them), not all \Objects in a field.
 
-We do not believe regenerating \texttt{HeavyFootprint}s by re-running the deblender on-demand is a viable way to implement this proposal; the deblender's computational performance and large inputs would make that approach both inefficient and high-latency in access patterns that involve rare \Objects.  The deblender algorithm \emph{may} permit a highly compressed output (e.g. an analytic model) that allows the true \texttt{HeavyFootprints} to be regenerated from the coadd data (which would be an acceptable implementation), but this cannot be guaranteed today.
+We do not believe regenerating \texttt{HeavyFootprint}s by re-running the deblender on-demand is a viable way to implement this proposal; even if running it does not require regenerating some coadds, the deblender will still likely be one of our most computationally expensive algorithms, and we currently have no requirement to make it executable on a per-\Object bases.  So while regenerating \texttt{HeavyFootprints} may technically represent a tradeoff between computation and storage, it likely the storage cost will be sufficiently lower (as well as lower-latency).  The deblender algorithm \emph{may} permit a highly compressed output (e.g. an analytic model) that allows the true \texttt{HeavyFootprints} to be regenerated from the coadd data (which would be an acceptable implementation), but this cannot be guaranteed today.
 
 We do not propose storing \texttt{HeavyFootprints} for \emph{best-seeing} or other coadd flavors besides \emph{deep}.  It is likely these could be derived efficiently from those coadd images and the \emph{deep} coadd \texttt{HeavyFootprints}, but since most measurements will be done on the \emph{deep} coadds we anticipate the need for deblender outputs for other flavors to be much less.
 
@@ -63,6 +63,7 @@ Because the pixels included in the set of \texttt{HeavyFootprints} are defined b
 
 \begin{figure}
 \includegraphics[width=\textwidth]{regression.png}
+\caption{Per-patch \texttt{HeavyFootprint} storage costs in LSST processing of HSC SSP data.  The red vertical lines indicate the approximate depth of LSST data releases.  Green line is the linear regression discussed in the text.}
 \label{fig:regression}
 \end{figure}
 
@@ -76,13 +77,19 @@ $$
 $$
 The conversion from HSC exposure time to LSST visits assumes 30s for each LSST visit and simply accounts for the difference in effective primary mirror size.
 
-The patch area of $0.03484\,\mathrm{deg}^2$ represents only the inner, non-overlapping area of the patch, but the footprint storage estimate comes from the full area of $0.03841\,\mathrm{deg}^2$.  The inner area should be used when estimating the number of patches from the area of a survey, which will automatically account (in part; tracts also overlap) for the current overlap fraction.
+The patch area of $0.03484\,\mathrm{deg}^2$ represents only the inner, non-overlapping area of the patch, but the footprint storage estimate comes from the full area of $0.03841\,\mathrm{deg}^2$.  The inner area should be used when estimating the number of patches from the area of a survey, which will automatically account (in part; tracts also overlap) for the current overlap fraction.  This yields
+$$
+    \frac{\mathrm{storage}}{(\mathrm{MB})(\mathrm{deg}^2)(N_\mathrm{bands})} =
+        N_{\mathrm{visits},i} \times 4.277 + 524.11
+$$
 
 The effect of the difference in seeing between HSC and LSST is not clear; LSST's larger PSF will both increase the area covered by bright \Objects and prevent \Objects at the edge of HSC's detection limit from being detected at all.  HSC has smaller ($0.168\,\mathrm{arcsec}$) pixels as well, however, which should make this an overestimate (and hence a conservative estimate) for LSST storage costs.
 
 Assuming a $24,000\,\mathrm{deg}^2$ survey and $236$ ($12$) $i$-band visits in DR11 (DR1), the total projected storage cost for all six bands is $220.8\,\mathrm{TB}$ ($82.9\,\mathrm{TB}$).
+
 \begin{figure}
 \includegraphics[width=\textwidth]{histogram.png}
+\caption{Histogram of per-\Object storage costs for \texttt{HeavyFootprints} in LSST processing of HSC SSP data.}
 \label{fig:histogram}
 \end{figure}
 
