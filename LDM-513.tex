@@ -1,4 +1,4 @@
-\documentclass[DM,lsstdraft,toc]{lsstdoc}
+\documentclass[DM,toc]{lsstdoc}
 
 % Package imports go here
 
@@ -11,9 +11,7 @@ James~Bosch
 }
 
 \setDocRef{LDM-513}
-\date{\today}
-\setDocRevision{1}
-\setDocStatus{draft}
+\date{2017-06-02}
 
 \setDocAbstract{%
 Most catalog measurements produced in a LSST Data Release Production will be derived from pixel values that have been \emph{deblended} -- we have apportioned the flux in each pixel to each of the \Objects that overlap that pixel.  These deblended pixels values are thus a critical link in our provenance chain, and should be provided to users as a first-class data product.  This document provides further justification for the proposal to add this data product and provides a preliminary estimate of the impact on data storage requirements of an additional $83\,\mathrm{TB}$ in DR1 and $221\,\mathrm{TB}$ in DR11.
@@ -23,8 +21,9 @@ Most catalog measurements produced in a LSST Data Release Production will be der
 % correct place with \maketitle
 % OLDEST FIRST: VERSION, DATE, DESCRIPTION, OWNER NAME
 \setDocChangeRecord{%
-\addtohist{1}{2017-04-01}{Initial release.}{James Bosch}
-\addtohist{2}{2017-04-28}{Science Rationale}{David Ciardi}
+\addtohist{}{2017-04-01}{Initial release.}{James Bosch}
+\addtohist{}{2017-04-28}{Science Rationale}{David Ciardi}
+\addtohist{1.0}{2017-06-02}{Approved in \jira{RFC-329}}{W.~O'Mullane}
 }
 
 \begin{document}
@@ -57,7 +56,7 @@ We do not believe regenerating \texttt{HeavyFootprint}s by re-running the deblen
 
 We do not propose storing \texttt{HeavyFootprints} for \emph{best-seeing} or other coadd flavors besides \emph{deep}.  It is likely these could be derived efficiently from those coadd images and the \emph{deep} coadd \texttt{HeavyFootprints}, but since most measurements will be done on the \emph{deep} coadds we anticipate the need for deblender outputs for other flavors to be much less.
 
-We also do not propose storing \texttt{HeavyFootprints} for \Source.  We expect {\Source measurements to be much more lightly used than \Object or \ForcedSource measurements, and \Source \texttt{HeavyFootprints} can be more efficiently regenerated because they are produced by a simpler, faster form of the deblender.
+We also do not propose storing \texttt{HeavyFootprints} for \Source.  We expect \Source measurements to be much more lightly used than \Object or \ForcedSource measurements, and \Source \texttt{HeavyFootprints} can be more efficiently regenerated because they are produced by a simpler, faster form of the deblender.
 
 \section{Impact on Storage}
 
@@ -97,7 +96,6 @@ Assuming a $24,000\,\mathrm{deg}^2$ survey and $236$ ($12$) $i$-band visits in D
 
 It is also worth noting that the dynamic range of per-\Object \texttt{HeavyFootprint} storage sizes spans several orders of magnitude, as shown in Figure~\ref{fig:histogram}.  Storage cannot be assumed to be even approximately constant across \Objects.
 
-\bibliographystyle{gaia_aa}
-\bibliography{lsst,local-refs}
+\bibliography{lsst,refs_ads}
 
 \end{document}
